@@ -2,7 +2,6 @@ import { AmountInput } from '@alfalab/core-components/amount-input/cssm';
 import { Button } from '@alfalab/core-components/button/cssm';
 import { CalendarMobile } from '@alfalab/core-components/calendar/cssm/mobile';
 import { Collapse } from '@alfalab/core-components/collapse/cssm';
-import { Divider } from '@alfalab/core-components/divider/cssm';
 
 import { Gap } from '@alfalab/core-components/gap/cssm';
 import { Input } from '@alfalab/core-components/input/cssm';
@@ -30,12 +29,9 @@ import p2Img from './assets/p2.png';
 import p3Img from './assets/p3.png';
 import p4Img from './assets/p4.png';
 import rubIcon from './assets/rub.png';
-import { useStocksData } from './hooks/useStocksData';
 import { LS, LSKeys } from './ls';
 import { appSt } from './style.css';
 import { ThxLayout } from './thx/ThxLayout';
-import { getWordEnding } from './utils/words';
-import { WaitIcon } from './WaitIcon';
 
 const targets = [
   {
@@ -126,7 +122,7 @@ export const App = () => {
   const [loading, setLoading] = useState(false);
   const [thxShow, setThx] = useState(LS.getItem(LSKeys.ShowThx, false));
   const [collapsedItems, setCollapsedItem] = useState<string[]>([]);
-  const [steps, setSteps] = useState<'init' | 'sums' | 'opening'>();
+  const [steps, setSteps] = useState<'init' | 'sums'>();
   const [sum, setSum] = useState(INVEST_MIN);
   const [error, setError] = useState('');
   const [autoSum, setAutoSum] = useState(0);
@@ -135,8 +131,6 @@ export const App = () => {
   const [payDate, setPayDate] = useState(dayjs().add(1, 'month').toDate().toISOString());
   const [openBs, setOpenBs] = useState(false);
   const [perItem, setPerItem] = useState<OptionKey>('per_month');
-  const [stockSlots, setStockSlots] = useState<{ ticker: string; lots: number }[]>([]);
-  const { stocks } = useStocksData();
 
   useEffect(() => {
     if (!LS.getItem(LSKeys.UserId, null)) {
@@ -186,112 +180,13 @@ export const App = () => {
       setErrorAutomSum('Введите сумму автоплатежа');
       return;
     }
-    setSteps('opening');
+    submit();
   };
 
   if (thxShow) {
     return <ThxLayout />;
   }
 
-  if (steps === 'opening') {
-    return (
-      <>
-        <div className={appSt.container}>
-          <Gap size={8} />
-          <WaitIcon />
-          <Typography.TitleResponsive tag="h1" view="small" font="system" weight="semibold">
-            ИИС открывается
-          </Typography.TitleResponsive>
-          <Typography.Text view="primary-medium" color="secondary">
-            Предлагаем на выбор ТОП-10 активов Московской биржи для первых инвестиций
-          </Typography.Text>
-        </div>
-
-        <div style={{ borderRadius: '1rem 1rem 0 0', backgroundColor: '#F6F6FD' }} className={appSt.container}>
-          <Typography.TitleResponsive tag="h2" view="small" font="system" weight="semibold">
-            Выберите активы
-          </Typography.TitleResponsive>
-
-          {stocks.map(stock => {
-            const isStockSelected = stockSlots.some(slot => slot.ticker === stock.ticker);
-            const value = stockSlots.find(slot => slot.ticker === stock.ticker)?.lots ?? 1;
-            return (
-              <div key={stock.ticker} className={appSt.stockBox}>
-                <PureCell>
-                  <PureCell.Graphics verticalAlign="center">
-                    <img src={stock.img} width={48} height={48} alt={stock.ticker} />
-                  </PureCell.Graphics>
-                  <PureCell.Content>
-                    <PureCell.Main>
-                      <Typography.Text view="primary-medium" weight="bold">
-                        {stock.name}
-                      </Typography.Text>
-
-                      <Typography.Text view="primary-small" color="secondary">
-                        Текущая цена: {stock.price_today.toLocaleString('ru-RU')} ₽
-                      </Typography.Text>
-                    </PureCell.Main>
-                  </PureCell.Content>
-                  <PureCell.Addon verticalAlign="center">
-                    <Switch
-                      checked={isStockSelected}
-                      onChange={() => {
-                        // add or remove from stockSlots
-                        setStockSlots(slots => {
-                          if (slots.some(slot => slot.ticker === stock.ticker)) {
-                            return slots.filter(slot => slot.ticker !== stock.ticker);
-                          } else {
-                            return [...slots, { ticker: stock.ticker, lots: 1 }];
-                          }
-                        });
-                      }}
-                    />
-                  </PureCell.Addon>
-                </PureCell>
-
-                {isStockSelected && (
-                  <>
-                    <Divider />
-
-                    <AmountInput
-                      value={value}
-                      labelView="outer"
-                      label={`1 лот = ${stock.lot} шт`}
-                      minority={1}
-                      bold={false}
-                      suffix={getWordEnding(value, ['лот', 'лота', 'лотов'])}
-                      block
-                      onChange={(_, { value }) => {
-                        setStockSlots(slots =>
-                          slots.map(slot => (slot.ticker === stock.ticker ? { ...slot, lots: value || 1 } : slot)),
-                        );
-                      }}
-                      stepper={{ step: 1, min: 1, max: 1_000 }}
-                    />
-                  </>
-                )}
-              </div>
-            );
-          })}
-
-          <Typography.Text view="primary-small" color="secondary">
-            Не является индивидуальной инвестиционной рекомендацией
-          </Typography.Text>
-        </div>
-
-        <Gap size={128} />
-
-        <div className={appSt.bottomBtn} style={{ backgroundColor: '#F6F6FD' }}>
-          <Button block view="primary" onClick={submit} loading={loading}>
-            Добавить в портфель
-          </Button>
-          <Button block view="secondary" onClick={submit} loading={loading}>
-            Пропустить
-          </Button>
-        </div>
-      </>
-    );
-  }
   if (steps === 'sums') {
     return (
       <>
@@ -369,7 +264,7 @@ export const App = () => {
         <Gap size={96} />
 
         <div className={appSt.bottomBtn}>
-          <Button block view="primary" onClick={goNext}>
+          <Button block view="primary" onClick={goNext} loading={loading}>
             Продолжить
           </Button>
         </div>
