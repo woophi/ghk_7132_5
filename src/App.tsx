@@ -32,6 +32,7 @@ import rubIcon from './assets/rub.png';
 import { LS, LSKeys } from './ls';
 import { appSt } from './style.css';
 import { ThxLayout } from './thx/ThxLayout';
+import { sendDataToGA } from './utils/events';
 
 const targets = [
   {
@@ -141,19 +142,15 @@ export const App = () => {
   const submit = () => {
     setLoading(true);
 
-    // sendDataToGA({
-    //   autopayments: Number(checked) as 1 | 0,
-    //   limit: Number(checked2) as 1 | 0,
-    //   limit_sum: limit ?? 0,
-    //   insurance: Number(checked3) as 1 | 0,
-    //   email: email ? 1 : 0,
-    // }).then(() => {
-    //   LS.setItem(LSKeys.ShowThx, true);
-    //   setThx(true);
-    //   setLoading(false);
-    // });
-    setThx(true);
-    setLoading(false);
+    sendDataToGA({
+      sum,
+      autopayment_sum: checked ? autoSum : null,
+      autopayment_frec: checked ? (OPTIONS.find(option => option.key === perItem)?.content ?? null) : null,
+    }).then(() => {
+      LS.setItem(LSKeys.ShowThx, true);
+      setThx(true);
+      setLoading(false);
+    });
   };
 
   const handleChangeInput = (_: React.ChangeEvent<HTMLInputElement> | null, { value }: { value: number | null }) => {
@@ -171,6 +168,8 @@ export const App = () => {
   };
 
   const goNext = () => {
+    window.gtag('event', '7132_next_click', { var: 'var5' });
+
     if (sum < INVEST_MIN || sum > INVEST_MAX) {
       setError(`От ${INVEST_MIN.toLocaleString('ru-RU')} до ${INVEST_MAX.toLocaleString('ru-RU')} ₽`);
       return;
@@ -410,8 +409,6 @@ export const App = () => {
           <div key={index}>
             <div
               onClick={() => {
-                window.gtag('event', '7132_bundle_faq', { faq: String(index + 1), var: 'var5' });
-
                 setCollapsedItem(items =>
                   items.includes(String(index + 1))
                     ? items.filter(item => item !== String(index + 1))
