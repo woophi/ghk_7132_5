@@ -168,8 +168,6 @@ export const App = () => {
   };
 
   const goNext = () => {
-    window.gtag('event', '7132_next_click', { var: 'var5' });
-
     if (sum < INVEST_MIN || sum > INVEST_MAX) {
       setError(`От ${INVEST_MIN.toLocaleString('ru-RU')} до ${INVEST_MAX.toLocaleString('ru-RU')} ₽`);
       return;
@@ -179,6 +177,8 @@ export const App = () => {
       setErrorAutomSum('Введите сумму автоплатежа');
       return;
     }
+    window.gtag('event', '7132_next_click', { var: 'var5' });
+
     submit();
   };
 
@@ -447,6 +447,8 @@ export const App = () => {
           block
           view="primary"
           onClick={() => {
+            window.gtag('event', '7132_start_click', { var: 'var5' });
+
             setSteps('sums');
           }}
         >
