@@ -9,6 +9,7 @@ import { PureCell } from '@alfalab/core-components/pure-cell/cssm';
 import { SelectMobile } from '@alfalab/core-components/select/cssm/mobile';
 import { Steps } from '@alfalab/core-components/steps/cssm';
 import { Switch } from '@alfalab/core-components/switch/cssm';
+import { Tag } from '@alfalab/core-components/tag/cssm';
 import { Typography } from '@alfalab/core-components/typography/cssm';
 import { CalendarMIcon } from '@alfalab/icons-glyph/CalendarMIcon';
 import { CheckmarkMIcon } from '@alfalab/icons-glyph/CheckmarkMIcon';
@@ -119,6 +120,8 @@ const OPTIONS = [
   { key: 'per_annual', content: 'Раз в год' },
 ];
 
+const chips = [2_000, 5_000, 15_000, 25_000];
+
 export const App = () => {
   const [loading, setLoading] = useState(false);
   const [thxShow, setThx] = useState(LS.getItem(LSKeys.ShowThx, false));
@@ -147,7 +150,6 @@ export const App = () => {
       autopayment_sum: checked ? autoSum : null,
       autopayment_frec: checked ? (OPTIONS.find(option => option.key === perItem)?.content ?? null) : null,
     }).then(() => {
-      LS.setItem(LSKeys.ShowThx, true);
       setThx(true);
       setLoading(false);
     });
@@ -218,6 +220,18 @@ export const App = () => {
             minority={1}
             bold={false}
           />
+
+          <div>
+            <Swiper spaceBetween={12} slidesPerView="auto">
+              {chips.map(chip => (
+                <SwiperSlide key={chip} className={appSt.swSlide}>
+                  <Tag checked={sum === chip} view="filled" size="xxs" shape="rectangular" onClick={() => setSum(chip)}>
+                    {chip.toLocaleString('ru')} ₽
+                  </Tag>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
 
           <Switch block reversed checked={checked} label="Пополнять регулярно" onChange={() => setChecked(!checked)} />
 

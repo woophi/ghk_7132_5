@@ -97,6 +97,10 @@ const stockBox = style({
   backgroundColor: '#FFFFFF',
 });
 
+const swSlide = style({
+  width: 'min-content',
+});
+
 export const appSt = {
   bottomBtn,
   container,
@@ -109,4 +113,5 @@ export const appSt = {
   rowSb,
   bannerAccount,
   stockBox,
+  swSlide,
 };

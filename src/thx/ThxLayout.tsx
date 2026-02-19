@@ -11,7 +11,7 @@ const LINK_NEXT_GO =
 export const ThxLayout = () => {
   useTimeout(() => {
     const link = LS.getItem(LSKeys.ShowThx, false) ? LINK_NEXT_GO : LINK_FIRST_GO;
-    // LS.setItem(LSKeys.ShowThx, true);
+    LS.setItem(LSKeys.ShowThx, true);
     window.location.replace(link);
   }, 2500);
   return (
